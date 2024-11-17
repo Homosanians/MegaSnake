@@ -2,17 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BotSnakeController : MonoBehaviour
+public class BotSnakeController : ISnakeController
 {
-    // Start is called before the first frame update
-    void Start()
+    public SnakeAction MakeDecision(Snake snake)
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        return SnakeAction.MoveForward;
     }
 }

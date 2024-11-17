@@ -1,5 +1,5 @@
 public enum SnakeTailState
 {
-    Connected,
+    PartOfLivingSnake,
     Orphaned
 }

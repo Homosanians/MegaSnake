@@ -41,7 +41,6 @@ public class Piece : MonoBehaviour
 
     public bool Move(Vector2Int translation)
     {
-
         var newPosition = this.Position;
         newPosition.x += translation.x;
         newPosition.y += translation.y;
@@ -159,7 +158,6 @@ public class Piece : MonoBehaviour
                     x = Mathf.RoundToInt((cell.x * Data.RotationMatrix[0] * direction) + (cell.y * Data.RotationMatrix[1] * direction));
                     y = Mathf.RoundToInt((cell.x * Data.RotationMatrix[2] * direction) + (cell.y * Data.RotationMatrix[3] * direction));
                     break;
-
             }
 
             Cells[i] = new Vector3Int(x, y, 0);

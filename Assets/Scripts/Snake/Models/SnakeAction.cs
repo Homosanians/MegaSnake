@@ -2,6 +2,5 @@ public enum SnakeAction
 {
     MoveForward,
     TurnLeft,
-    TurnRight,
-    Destroy
+    TurnRight
 }

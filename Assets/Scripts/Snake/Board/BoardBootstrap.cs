@@ -5,8 +5,7 @@ using UnityEngine.Tilemaps;
 
 public class BoardBootstrap : MonoBehaviour
 {
-    [SerializeField] int _width = 10;
-    [SerializeField] int _height = 20;
+    [SerializeField] private SnakeBoard _board;
 
     [SerializeField] SpriteRenderer _boardTilesRenderer;
     [SerializeField] SpriteRenderer _borderRenderer;
@@ -23,8 +22,11 @@ public class BoardBootstrap : MonoBehaviour
                 );
 
         _boardTilesRenderer.drawMode = SpriteDrawMode.Tiled;
-        _boardTilesRenderer.size = new Vector2(_width, _height);
+        _boardTilesRenderer.size = new Vector2(_board.Width, _board.Height);
 
-        _borderRenderer.transform.localScale = new Vector3(_uniformScaleFactor.x * _width, _uniformScaleFactor.y * _height, 1);
+        _borderRenderer.transform.localScale = new Vector3(
+            _uniformScaleFactor.x * _board.Width,
+            _uniformScaleFactor.y * _board.Height,
+            1);
     }
 }
