@@ -13,7 +13,6 @@ public class SnakeBoard : MonoBehaviour
 {
     [field: SerializeField]
     public Tilemap Tilemap { get; private set; }
-
     public List<Snake> Snakes { get; private set; } = new List<Snake>();
     public List<SnakeTile> SnakeTiles { get; private set; } = new List<SnakeTile>();
 
@@ -39,6 +38,8 @@ public class SnakeBoard : MonoBehaviour
     [SerializeField] private GameObject _snakePrefab;
 
     [SerializeField] private Tile _commonTile;
+
+    public Tile CommonTile => _commonTile;
 
     private Vector2Int _calculatedMinBoundPoint;
     private Vector2Int _calculatedMaxBoundPoint;
@@ -79,19 +80,20 @@ public class SnakeBoard : MonoBehaviour
 
     private void MoveTile(SnakeTile snakeTile, Vector2Int newPosition)
     {
-        Debug.Log($"{snakeTile.Position} to {newPosition}");
-
         if (IsPositionOccupied(newPosition))
         {
-            throw new Exception("Cant move tile to occupied position");
+            throw new Exception("Cannot move tile to occupied position");
         }
 
         if (!IsPositionWithinBounds(newPosition))
         {
-            throw new Exception("Cant move tile to position out of bounds");
+            throw new Exception("Cannot move tile to position out of bounds");
         }
 
-        MoveTile(snakeTile.Position.ToVector3Int(), newPosition.ToVector3Int());
+        // Move the tile without destroying/recreating it
+        Tilemap.SetTile(newPosition.ToVector3Int(), snakeTile.CustomTile);
+        Tilemap.SetTile(snakeTile.Position.ToVector3Int(), null);
+
         snakeTile.Position = newPosition;
     }
 
@@ -222,16 +224,29 @@ public class SnakeBoard : MonoBehaviour
 
     private void MoveSnake(Snake snake, Vector2Int nextPosition)
     {
-        // MoveTile(snake.Tiles.First.Position.ToVector3Int(), nextPosition.ToVector3Int());
+        Vector2Int previousPosition;
 
-        // MoveTile(snake.Tiles.Find(x => x.Order == 0), nextPosition);
-
-        Vector2Int buffer;
-        foreach (var item in snake.Tiles)
+        foreach (var tile in snake.Tiles)
         {
-            buffer = item.Position;
-            MoveTile(item, nextPosition);
-            nextPosition = buffer;
+            previousPosition = tile.Position;
+
+            // Move the tile
+            MoveTile(tile, nextPosition);
+
+            // Update the "nextPosition" for the next tile in the snake
+            nextPosition = previousPosition;
         }
     }
+
+
+    //private void MoveSnake(Snake snake, Vector2Int nextPosition)
+    //{
+    //    Vector2Int buffer;
+    //    foreach (var item in snake.Tiles)
+    //    {
+    //        buffer = item.Position;
+    //        MoveTile(item, nextPosition);
+    //        nextPosition = buffer;
+    //    }
+    //}
 }

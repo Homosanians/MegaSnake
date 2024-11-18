@@ -11,19 +11,18 @@ public class Snake : MonoBehaviour
     public List<SnakeTile> Tiles { get; private set; } = new List<SnakeTile>();
     private ISnakeController _controller;
 
-
     public void AddSnakeTile(int order, Vector2Int position, string letter)
     {
-        var headTile = new SnakeTile(order, letter);
-        headTile.Position = position;
-        Tiles.Add(headTile);
-        Board.SetTile(position.ToVector3Int(), headTile.Letter);
+        var snakeTile = new SnakeTile(order, position, letter, ScriptableObject.Instantiate(Board.CommonTile));
+
+        Tiles.Add(snakeTile);
+        Board.Tilemap.SetTile(position.ToVector3Int(), snakeTile.CustomTile);
     }
 
     public void Initialize(SnakeBoard snakeBoard, Vector2Int position, int length)
     {
         Board = snakeBoard;
-        _controller = new BotSnakeController(this, Board, 1);
+        _controller = new BotSnakeController(this, Board, 10);
 
         SnakeOrchestrator.Instance.Register(this);
 

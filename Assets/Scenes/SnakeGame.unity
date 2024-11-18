@@ -1413,7 +1413,7 @@ MonoBehaviour:
   <Tilemap>k__BackingField: {fileID: 1240372693}
   _boardSize: {x: 10, y: 20}
   _playerSpawnPosition: {x: 0, y: 0}
-  _playerSpawnSnakeLength: 3
+  _playerSpawnSnakeLength: 5
   _snakePrefab: {fileID: 7912054452659155755, guid: 5e9cfc798033f4ec889189d9c480271d, type: 3}
   _commonTile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}
 --- !u!114 &1058101458
@@ -1428,7 +1428,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd48ddca64d5a1f439403864506008e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _tickIntervalMilliseconds: 400
+  _tickIntervalMilliseconds: 50
   _startupHoldMilliseconds: 100
 --- !u!1 &1064872655
 GameObject:

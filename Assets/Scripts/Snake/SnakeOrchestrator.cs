@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class SnakeOrchestrator : MonoBehaviour
@@ -9,8 +10,8 @@ public class SnakeOrchestrator : MonoBehaviour
 
     public List<Snake> Snakes { get; private set; } = new List<Snake>();
 
-    [SerializeField] private int _tickIntervalMilliseconds = 500;
-    [SerializeField] private int _startupHoldMilliseconds = 500;
+    [SerializeField] private int _tickIntervalMilliseconds = 100;
+    [SerializeField] private int _startupHoldMilliseconds = 0;
     private bool _isRunning = true;
 
     private void Awake()
