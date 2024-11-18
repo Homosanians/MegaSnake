@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5812309554175087921}
-  - component: {fileID: -5190048379869142949}
+  - component: {fileID: 3099165141787466317}
   m_Layer: 0
   m_Name: SnakeInstance
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-5190048379869142949
+--- !u!114 &3099165141787466317
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,4 +44,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b4b85b67d7fc914c83b08f6dc4955ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}

@@ -569,7 +569,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 491dba8cc9522894e8c6f4db764199dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _board: {fileID: 1058101458}
+  _board: {fileID: 1058101457}
   _boardTilesRenderer: {fileID: 1926152394}
   _borderRenderer: {fileID: 743052318}
   _calculateUniformScaleOnAwake: 0
@@ -1361,8 +1361,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1058101456}
   - component: {fileID: 1058101455}
-  - component: {fileID: 1058101457}
   - component: {fileID: 1058101458}
+  - component: {fileID: 1058101457}
   m_Layer: 0
   m_Name: Board
   m_TagString: Untagged
@@ -1405,71 +1405,6 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1058101454}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 725cee5bd6644fe4ead74399a4238c9a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  EndGame: {fileID: 550440082}
-  SpawnPosition: {x: -1, y: 8, z: 0}
-  Tetrominoes:
-  - TetrominoType: 0
-    Tile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}
-    Letters:
-    - "\u0414"
-    - "\u0418"
-    - "\u041C"
-    - "\u0410"
-  - TetrominoType: 1
-    Tile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}
-    Letters:
-    - "\u0414"
-    - "\u0418"
-    - "\u041C"
-    - "\u0410"
-  - TetrominoType: 2
-    Tile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}
-    Letters:
-    - "\u0414"
-    - "\u0418"
-    - "\u041C"
-    - "\u0410"
-  - TetrominoType: 3
-    Tile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}
-    Letters:
-    - "\u0414"
-    - "\u0418"
-    - "\u041C"
-    - "\u0410"
-  - TetrominoType: 4
-    Tile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}
-    Letters:
-    - "\u0414"
-    - "\u0418"
-    - "\u041C"
-    - "\u0410"
-  - TetrominoType: 5
-    Tile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}
-    Letters:
-    - "\u0414"
-    - "\u0418"
-    - "\u041C"
-    - "\u0410"
-  - TetrominoType: 6
-    Tile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}
-    Letters:
-    - "\u0414"
-    - "\u0418"
-    - "\u041C"
-    - "\u0410"
-  BoardSize: {x: 10, y: 20}
---- !u!114 &1058101458
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1058101454}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0ac41aa9cc87eb04e809cbde8e15919c, type: 3}
@@ -1481,6 +1416,20 @@ MonoBehaviour:
   _playerSpawnSnakeLength: 3
   _snakePrefab: {fileID: 7912054452659155755, guid: 5e9cfc798033f4ec889189d9c480271d, type: 3}
   _commonTile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}
+--- !u!114 &1058101458
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1058101454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd48ddca64d5a1f439403864506008e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _tickIntervalMilliseconds: 400
+  _startupHoldMilliseconds: 100
 --- !u!1 &1064872655
 GameObject:
   m_ObjectHideFlags: 0
@@ -1643,7 +1592,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1058101457}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Board, Assembly-CSharp
         m_MethodName: Restart
         m_Mode: 1
@@ -1972,51 +1921,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1734335928}
   m_CullTransparentMesh: 1
---- !u!1 &1743734130
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1743734132}
-  - component: {fileID: 1743734131}
-  m_Layer: 0
-  m_Name: SNAKE
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1743734131
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1743734130}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd48ddca64d5a1f439403864506008e7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _tickIntervalMilliseconds: 500
---- !u!4 &1743734132
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1743734130}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1337.7263, y: 812.778, z: -0.00550573}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1843160010
 GameObject:
   m_ObjectHideFlags: 0
@@ -2100,7 +2004,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1058101457}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Board, Assembly-CSharp
         m_MethodName: ReturnToWords
         m_Mode: 1

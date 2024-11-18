@@ -17,7 +17,7 @@ public class BoardBootstrap : MonoBehaviour
     {
         if (_calculateUniformScaleOnAwake)
             _uniformScaleFactor = new Vector2(
-                _borderRenderer.transform.localScale.x / _boardTilesRenderer.size.x, 
+                _borderRenderer.transform.localScale.x / _boardTilesRenderer.size.x,
                 _borderRenderer.transform.localScale.y / _boardTilesRenderer.size.y
                 );
 

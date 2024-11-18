@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -54,8 +56,11 @@ public class SnakeBoard : MonoBehaviour
             boardWidthOdd ? 0.5f : 0,
             boardHeightOdd ? 0.5f : 0,
             0);
+    }
 
-        InstantiatePlayerSnake();
+    private void OnEnable()
+    {
+        InstantiatePlayerSnake(); // Dont call in awake
     }
 
     public void InstantiatePlayerSnake()
@@ -74,6 +79,8 @@ public class SnakeBoard : MonoBehaviour
 
     private void MoveTile(SnakeTile snakeTile, Vector2Int newPosition)
     {
+        Debug.Log($"{snakeTile.Position} to {newPosition}");
+
         if (IsPositionOccupied(newPosition))
         {
             throw new Exception("Cant move tile to occupied position");
@@ -196,8 +203,6 @@ public class SnakeBoard : MonoBehaviour
 
     public bool TryMoveSnake(Snake snake, Vector2Int nextPosition)
     {
-        nextPosition = snake.Tiles.Find(x => x.Order == 0).Position + new Vector2Int(0, 1);
-
         if (!IsPositionWithinBounds(nextPosition))
         {
             Debug.Log("Out of bounds");
@@ -219,7 +224,7 @@ public class SnakeBoard : MonoBehaviour
     {
         // MoveTile(snake.Tiles.First.Position.ToVector3Int(), nextPosition.ToVector3Int());
 
-        //MoveTile(snake.Tiles.Find(x => x.Order == 0), nextPosition);
+        // MoveTile(snake.Tiles.Find(x => x.Order == 0), nextPosition);
 
         Vector2Int buffer;
         foreach (var item in snake.Tiles)

@@ -10,6 +10,7 @@ public class SnakeOrchestrator : MonoBehaviour
     public List<Snake> Snakes { get; private set; } = new List<Snake>();
 
     [SerializeField] private int _tickIntervalMilliseconds = 500;
+    [SerializeField] private int _startupHoldMilliseconds = 500;
     private bool _isRunning = true;
 
     private void Awake()
@@ -29,6 +30,8 @@ public class SnakeOrchestrator : MonoBehaviour
 
     private IEnumerator TickLoop()
     {
+        yield return new WaitForSeconds(_tickIntervalMilliseconds / 1000f);
+
         while (_isRunning)
         {
             Tick();
