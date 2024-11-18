@@ -1477,9 +1477,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Tilemap>k__BackingField: {fileID: 1240372693}
   _boardSize: {x: 10, y: 20}
-  _playerSpawnPosition: {x: 5, y: 10}
+  _playerSpawnPosition: {x: 0, y: 0}
   _playerSpawnSnakeLength: 3
   _snakePrefab: {fileID: 7912054452659155755, guid: 5e9cfc798033f4ec889189d9c480271d, type: 3}
+  _commonTile: {fileID: 11400000, guid: 435c045b236b2484393abd5e88224d91, type: 2}
 --- !u!1 &1064872655
 GameObject:
   m_ObjectHideFlags: 0
@@ -1971,6 +1972,51 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1734335928}
   m_CullTransparentMesh: 1
+--- !u!1 &1743734130
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1743734132}
+  - component: {fileID: 1743734131}
+  m_Layer: 0
+  m_Name: SNAKE
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1743734131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743734130}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd48ddca64d5a1f439403864506008e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _tickIntervalMilliseconds: 500
+--- !u!4 &1743734132
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1743734130}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1337.7263, y: 812.778, z: -0.00550573}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1843160010
 GameObject:
   m_ObjectHideFlags: 0

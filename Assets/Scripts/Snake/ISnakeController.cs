@@ -4,5 +4,5 @@ using UnityEngine;
 
 public interface ISnakeController
 {
-    SnakeAction MakeDecision(Snake snake);
+    SnakeAction MakeDecision();
 }

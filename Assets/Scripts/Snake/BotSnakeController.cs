@@ -4,7 +4,16 @@ using UnityEngine;
 
 public class BotSnakeController : ISnakeController
 {
-    public SnakeAction MakeDecision(Snake snake)
+    readonly Snake _snake;
+    readonly SnakeBoard _board;
+
+    public BotSnakeController(Snake snake, SnakeBoard board)
+    {
+        _snake = snake;
+        _board = board;
+    }
+
+    public SnakeAction MakeDecision()
     {
         return SnakeAction.MoveForward;
     }
