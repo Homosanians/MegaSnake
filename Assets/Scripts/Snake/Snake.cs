@@ -73,7 +73,6 @@ public class Snake : MonoBehaviour
 
         var decision = _controller.MakeDecision();
 
-        // Calculate the next position based on the decision
         Vector2Int nextPosition = CalculateNextPosition(decision);
 
         // Pass the next position to the board to attempt movement
@@ -91,12 +90,11 @@ public class Snake : MonoBehaviour
             ? Tiles[0].Position - Tiles[1].Position // Calculate direction from head to second tile
             : Vector2Int.up; // Default to upward movement for single-tile snakes
 
-        // Adjust direction based on the decision
         Vector2Int nextDirection = decision switch
         {
             SnakeAction.MoveForward => currentDirection,
-            SnakeAction.TurnLeft => new Vector2Int(-currentDirection.y, currentDirection.x), // Rotate left
-            SnakeAction.TurnRight => new Vector2Int(currentDirection.y, -currentDirection.x), // Rotate right
+            SnakeAction.TurnLeft => new Vector2Int(-currentDirection.y, currentDirection.x),
+            SnakeAction.TurnRight => new Vector2Int(currentDirection.y, -currentDirection.x),
             _ => throw new System.ArgumentException("Invalid SnakeAction provided.")
         };
 
