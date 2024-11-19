@@ -14,6 +14,9 @@ public class SnakeOrchestrator : MonoBehaviour
     [SerializeField] private int _startupHoldMilliseconds = 0;
     private bool _isRunning = true;
 
+    private Queue<Snake> _enlistSnake = new Queue<Snake>();
+    private Queue<Snake> _delistSnake = new Queue<Snake>();
+
     private void Awake()
     {
         if (Instance != null)
@@ -43,6 +46,17 @@ public class SnakeOrchestrator : MonoBehaviour
 
     private void Tick()
     {
+        while (_enlistSnake.Count > 0) {
+            var item = _enlistSnake.Dequeue();
+            Snakes.Add(item);
+        }
+
+        while (_delistSnake.Count > 0)
+        {
+            var item = _delistSnake.Dequeue();
+            Snakes.Remove(item);
+        }
+
         foreach (var item in Snakes)
         {
             item.Move();
@@ -63,6 +77,16 @@ public class SnakeOrchestrator : MonoBehaviour
             throw new Exception("Snake already registered");
         }
 
-        Snakes.Add(snake);
+        _enlistSnake.Enqueue(snake);
+    }
+
+    internal void Deregister(Snake snake)
+    {
+        if (!Snakes.Contains(snake))
+        {
+            throw new Exception("Snake not registered");
+        }
+
+        _delistSnake.Enqueue(snake);
     }
 }

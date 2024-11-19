@@ -10,6 +10,7 @@ public class Snake : MonoBehaviour
     public SnakeBoard Board { get; private set; }
     public List<SnakeTile> Tiles { get; private set; } = new List<SnakeTile>();
     private ISnakeController _controller;
+    private bool _isDead = false;
 
     public void AddSnakeTile(int order, Vector2Int position, string letter)
     {
@@ -50,11 +51,24 @@ public class Snake : MonoBehaviour
     public void Die()
     {
         Debug.LogWarning("Snake died");
+
+        _isDead = true;
+
+        foreach (var item in Tiles)
+        {
+            Debug.LogWarning(item);
+            item.ChangeState(SnakeTailState.Orphaned);
+        }
+
+        SnakeOrchestrator.Instance.Deregister(this);
+
         Destroy(this);
     }
 
     public void Move()
     {
+        if (_isDead) return;
+
         var decision = _controller.MakeDecision();
 
         // Calculate the next position based on the decision

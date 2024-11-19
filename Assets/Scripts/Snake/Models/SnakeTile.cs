@@ -25,6 +25,36 @@ public class SnakeTile
         // Clone the tile to ensure unique text for each tile
         CustomTile = ScriptableObject.Instantiate(tile);
         CustomTile.name = $"Tile_{letter}";
+
+        UpdateText(letter);
+    }
+
+    public void ChangeState(SnakeTailState snakeTailState)
+    {
+        if (SnakeTailState == SnakeTailState.PartOfLivingSnake)
+        {
+            CustomTile.color = Color.white;
+            SnakeTailState = snakeTailState;
+        }
+        else if (SnakeTailState == SnakeTailState.Orphaned)
+        {
+            CustomTile.color = Color.gray;
+            SnakeTailState = snakeTailState;
+        }
+    }
+
+    public void UpdateText(string newText)
+    {
+        Letter = newText;
+        var textComponent = CustomTile.gameObject.GetComponentInChildren<TMP_Text>();
+        if (textComponent != null)
+        {
+            textComponent.text = newText;
+        }
+        else
+        {
+            Debug.LogError("TMP_Text component not found on the tile.");
+        }
     }
 
     public void SetLetter(string letter)

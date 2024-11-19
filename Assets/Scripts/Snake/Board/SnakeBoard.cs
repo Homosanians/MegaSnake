@@ -61,14 +61,16 @@ public class SnakeBoard : MonoBehaviour
 
     private void OnEnable()
     {
-        InstantiatePlayerSnake(); // Dont call in awake
+        InstantiatePlayerSnake(_playerSpawnPosition - new Vector2Int(2, 0), _playerSpawnSnakeLength);
+        InstantiatePlayerSnake(_playerSpawnPosition, _playerSpawnSnakeLength); // Dont call in awake
+        InstantiatePlayerSnake(_playerSpawnPosition + new Vector2Int(2,0), _playerSpawnSnakeLength);
     }
 
-    public void InstantiatePlayerSnake()
+    public void InstantiatePlayerSnake(Vector2Int spawnPosition, int length)
     {
         var instance = GameObject.Instantiate(_snakePrefab, transform);
         var snake = instance.GetComponent<Snake>();
-        snake.Initialize(this, _playerSpawnPosition, _playerSpawnSnakeLength);
+        snake.Initialize(this, spawnPosition, length);
     }
 
     private void MoveTile(Vector3Int position, Vector3Int newPosition)
@@ -78,7 +80,7 @@ public class SnakeBoard : MonoBehaviour
         Tilemap.SetTile(position, null);
     }
 
-    private void MoveTile(SnakeTile snakeTile, Vector2Int newPosition)
+    private void MoveTile(SnakeTile snakeTile, Vector2Int newPosition, string newLetter = null)
     {
         if (IsPositionOccupied(newPosition))
         {
@@ -90,10 +92,17 @@ public class SnakeBoard : MonoBehaviour
             throw new Exception("Cannot move tile to position out of bounds");
         }
 
-        // Move the tile without destroying/recreating it
+        // Optionally update the text
+        if (newLetter != null)
+        {
+            snakeTile.UpdateText(newLetter);
+        }
+
+        // Move the tile
         Tilemap.SetTile(newPosition.ToVector3Int(), snakeTile.CustomTile);
         Tilemap.SetTile(snakeTile.Position.ToVector3Int(), null);
 
+        // Update position
         snakeTile.Position = newPosition;
     }
 
@@ -176,21 +185,6 @@ public class SnakeBoard : MonoBehaviour
 
     }
 
-    public void Add(Snake snake)
-    {
-
-    }
-
-    public void Remove(Snake snake)
-    {
-
-    }
-
-    public void Remove(SnakeTile tile)
-    {
-
-    }
-
     public bool IsPositionWithinBounds(Vector2Int position)
     {
         return position.x >= _calculatedMinBoundPoint.x && position.x <= _calculatedMaxBoundPoint.x &&
@@ -230,15 +224,14 @@ public class SnakeBoard : MonoBehaviour
         {
             previousPosition = tile.Position;
 
-            // Move the tile
-            MoveTile(tile, nextPosition);
+            // Optionally update text (e.g., if text depends on position or order)
+            string newText = tile.Order.ToString(); // Example: update text to show the order
+            MoveTile(tile, nextPosition, newText);
 
-            // Update the "nextPosition" for the next tile in the snake
             nextPosition = previousPosition;
         }
     }
-
-
+    
     //private void MoveSnake(Snake snake, Vector2Int nextPosition)
     //{
     //    Vector2Int buffer;
