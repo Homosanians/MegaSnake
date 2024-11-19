@@ -8,6 +8,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
+using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 public class SnakeBoard : MonoBehaviour
 {
@@ -35,14 +36,26 @@ public class SnakeBoard : MonoBehaviour
     [SerializeField]
     private int _playerSpawnSnakeLength = 3;
 
+    [SerializeField] private Snake _playerSnake;
+
     [SerializeField] private GameObject _snakePrefab;
 
-    [SerializeField] private Tile _commonTile;
+    [SerializeField] private Tile _commonBotTile;
+    [SerializeField] private Tile _commonPlayerTile;
 
-    public Tile CommonTile => _commonTile;
+    public Tile CommonBotTile => _commonBotTile;
+    public Tile CommonPlayerTile => _commonPlayerTile;
 
     private Vector2Int _calculatedMinBoundPoint;
     private Vector2Int _calculatedMaxBoundPoint;
+
+    readonly Vector3Int[] directions = new Vector3Int[]
+{
+            new Vector3Int(0, 1, 0),   // Up
+            new Vector3Int(1, 0, 0),   // Right
+            new Vector3Int(0, -1, 0),  // Down
+            new Vector3Int(-1, 0, 0)   // Left
+    };
 
     private void Awake()
     {
@@ -61,16 +74,35 @@ public class SnakeBoard : MonoBehaviour
 
     private void OnEnable()
     {
-        InstantiatePlayerSnake(_playerSpawnPosition - new Vector2Int(2, 0), _playerSpawnSnakeLength);
-        InstantiatePlayerSnake(_playerSpawnPosition, _playerSpawnSnakeLength); // Dont call in awake
-        InstantiatePlayerSnake(_playerSpawnPosition + new Vector2Int(2,0), _playerSpawnSnakeLength);
+        // InstantiateNewBotSnake(_playerSpawnPosition - new Vector2Int(2, 0), _playerSpawnSnakeLength);
+        InstantiatePlayerSnake(_playerSnake, _playerSpawnPosition, _playerSpawnSnakeLength); // Dont call in awake
+                                                                                  //        InstantiateNewPlayerSnake(_playerSpawnPosition, _playerSpawnSnakeLength); // Dont call in awake
+        InstantiateNewBotSnake(_playerSpawnPosition + new Vector2Int(2,0), _playerSpawnSnakeLength, 1);
     }
 
-    public void InstantiatePlayerSnake(Vector2Int spawnPosition, int length)
+    public void InstantiatePlayerSnake(Snake snake, Vector2Int spawnPosition, int length)
+    {
+        var controller = snake.gameObject.GetComponent<PlayerSnakeController>();
+        snake.Initialize(CommonPlayerTile, this, controller, spawnPosition, length);
+    }
+
+    //public void InstantiateNewPlayerSnake(Vector2Int spawnPosition, int length)
+    //{
+    //    var instance = GameObject.Instantiate(_snakePrefab, transform);
+    //    var snake = instance.GetComponent<Snake>();
+
+    //    GameObject obj = new GameObject();
+    //    var controller = obj.AddComponent<PlayerSnakeController>();
+
+    //    snake.Initialize(CommonPlayerTile, this, controller, spawnPosition, length);
+    //}
+
+    public void InstantiateNewBotSnake(Vector2Int spawnPosition, int length, int thinkAheadDepth = 10)
     {
         var instance = GameObject.Instantiate(_snakePrefab, transform);
         var snake = instance.GetComponent<Snake>();
-        snake.Initialize(this, spawnPosition, length);
+        var controller = new BotSnakeController(snake, this, thinkAheadDepth);
+        snake.Initialize(CommonBotTile, this, controller, spawnPosition, length);
     }
 
     private void MoveTile(Vector3Int position, Vector3Int newPosition)
@@ -97,7 +129,7 @@ public class SnakeBoard : MonoBehaviour
         {
             snakeTile.UpdateText(newLetter);
         }
-
+        
         // Move the tile
         Tilemap.SetTile(newPosition.ToVector3Int(), snakeTile.CustomTile);
         Tilemap.SetTile(snakeTile.Position.ToVector3Int(), null);
@@ -105,20 +137,6 @@ public class SnakeBoard : MonoBehaviour
         // Update position
         snakeTile.Position = newPosition;
     }
-
-    public void SetTile(Vector3Int position, string letter)
-    {
-        _commonTile.gameObject.GetComponent<TMP_Text>().text = letter;
-        Tilemap.SetTile(position, _commonTile);
-    }
-
-    readonly Vector3Int[] directions = new Vector3Int[]
-    {
-            new Vector3Int(0, 1, 0),   // Up
-            new Vector3Int(1, 0, 0),   // Right
-            new Vector3Int(0, -1, 0),  // Down
-            new Vector3Int(-1, 0, 0)   // Left
-    };
 
     public Vector3Int? FindFreeAdjacentPosition(Vector3Int newPosition, Vector3Int? prefferedDirection)
     {
@@ -231,7 +249,14 @@ public class SnakeBoard : MonoBehaviour
             nextPosition = previousPosition;
         }
     }
-    
+
+    internal void SetColor(Tile customTile, Vector2Int position, Color color)
+    {
+        Tilemap.SetTile(position.ToVector3Int(), null);
+        customTile.color = color;
+        Tilemap.SetTile(position.ToVector3Int(), customTile);
+    }
+
     //private void MoveSnake(Snake snake, Vector2Int nextPosition)
     //{
     //    Vector2Int buffer;

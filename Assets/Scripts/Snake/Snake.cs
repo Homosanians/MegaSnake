@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
 
@@ -11,19 +12,21 @@ public class Snake : MonoBehaviour
     public List<SnakeTile> Tiles { get; private set; } = new List<SnakeTile>();
     private ISnakeController _controller;
     private bool _isDead = false;
+    private Tile _commonTile;
 
     public void AddSnakeTile(int order, Vector2Int position, string letter)
     {
-        var snakeTile = new SnakeTile(order, position, letter, ScriptableObject.Instantiate(Board.CommonTile));
+        var snakeTile = new SnakeTile(Board, order, position, letter, ScriptableObject.Instantiate(_commonTile));
 
         Tiles.Add(snakeTile);
         Board.Tilemap.SetTile(position.ToVector3Int(), snakeTile.CustomTile);
     }
 
-    public void Initialize(SnakeBoard snakeBoard, Vector2Int position, int length)
+    public void Initialize(Tile commonTile, SnakeBoard snakeBoard, ISnakeController controller, Vector2Int position, int length)
     {
+        _commonTile = commonTile;
         Board = snakeBoard;
-        _controller = new BotSnakeController(this, Board, 10);
+        _controller = controller;
 
         SnakeOrchestrator.Instance.Register(this);
 
@@ -56,8 +59,7 @@ public class Snake : MonoBehaviour
 
         foreach (var item in Tiles)
         {
-            Debug.LogWarning(item);
-            item.ChangeState(SnakeTailState.Orphaned);
+            item.ChangeState(SnakeTileState.Orphaned);
         }
 
         SnakeOrchestrator.Instance.Deregister(this);
@@ -79,8 +81,6 @@ public class Snake : MonoBehaviour
 
         if (!isSuccess)
             Die();
-
-        Debug.Log($"Moving snake {decision} (count {Tiles.Count}), pos {nextPosition}, success: {isSuccess}");
     }
 
     private Vector2Int CalculateNextPosition(SnakeAction decision)

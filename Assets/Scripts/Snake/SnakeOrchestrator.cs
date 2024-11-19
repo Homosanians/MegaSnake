@@ -4,28 +4,16 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class SnakeOrchestrator : MonoBehaviour
+public class SnakeOrchestrator : MonoBehaviourSingleton<SnakeOrchestrator>
 {
-    public static SnakeOrchestrator Instance { get; private set; }
-
     public List<Snake> Snakes { get; private set; } = new List<Snake>();
 
-    [SerializeField] private int _tickIntervalMilliseconds = 100;
-    [SerializeField] private int _startupHoldMilliseconds = 0;
+    private int _tickIntervalMilliseconds = 100;
+    private int _startupHoldMilliseconds = 0;
     private bool _isRunning = true;
 
     private Queue<Snake> _enlistSnake = new Queue<Snake>();
     private Queue<Snake> _delistSnake = new Queue<Snake>();
-
-    private void Awake()
-    {
-        if (Instance != null)
-        {
-            throw new System.Exception("Singleton duplicate");
-        }
-
-        Instance = this;
-    }
 
     private void Start()
     {

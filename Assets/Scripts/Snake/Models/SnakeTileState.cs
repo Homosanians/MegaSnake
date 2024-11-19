@@ -1,4 +1,4 @@
-public enum SnakeTailState
+public enum SnakeTileState
 {
     PartOfLivingSnake,
     Orphaned

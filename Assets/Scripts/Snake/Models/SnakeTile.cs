@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -8,15 +9,17 @@ using UnityEngine.WSA;
 
 public class SnakeTile
 {
+    public SnakeBoard SnakeBoard { get; }
     public Snake? Parent { get; private set; }
     public string Letter { get; private set; }
-    public SnakeTailState SnakeTailState { get; private set; }
+    public SnakeTileState SnakeTailState { get; private set; }
     public Vector2Int Position {get;set;}
     public int Order { get; set; }
     public UnityEngine.Tilemaps.Tile CustomTile { get; private set; }
 
-    public SnakeTile(int order, Vector2Int position, string letter, UnityEngine.Tilemaps.Tile tile, SnakeTailState snakeTailState = SnakeTailState.PartOfLivingSnake)
+    public SnakeTile(SnakeBoard snakeBoard, int order, Vector2Int position, string letter, UnityEngine.Tilemaps.Tile tile, SnakeTileState snakeTailState = SnakeTileState.PartOfLivingSnake)
     {
+        SnakeBoard = snakeBoard;
         Order = order;
         Position = position;
         Letter = letter;
@@ -29,17 +32,17 @@ public class SnakeTile
         UpdateText(letter);
     }
 
-    public void ChangeState(SnakeTailState snakeTailState)
+    public void ChangeState(SnakeTileState newSnakeTailState)
     {
-        if (SnakeTailState == SnakeTailState.PartOfLivingSnake)
+        if (newSnakeTailState == SnakeTileState.PartOfLivingSnake)
         {
-            CustomTile.color = Color.white;
-            SnakeTailState = snakeTailState;
+            SnakeBoard.SetColor(CustomTile, Position, Color.red);
+            SnakeTailState = newSnakeTailState;
         }
-        else if (SnakeTailState == SnakeTailState.Orphaned)
+        else if (newSnakeTailState == SnakeTileState.Orphaned)
         {
-            CustomTile.color = Color.gray;
-            SnakeTailState = snakeTailState;
+            SnakeBoard.SetColor(CustomTile, Position, Color.gray);
+            SnakeTailState = newSnakeTailState;
         }
     }
 
@@ -54,16 +57,6 @@ public class SnakeTile
         else
         {
             Debug.LogError("TMP_Text component not found on the tile.");
-        }
-    }
-
-    public void SetLetter(string letter)
-    {
-        Letter = letter;
-        var textComponent = CustomTile.gameObject.GetComponent<TMP_Text>();
-        if (textComponent != null)
-        {
-            textComponent.text = letter;
         }
     }
 }
