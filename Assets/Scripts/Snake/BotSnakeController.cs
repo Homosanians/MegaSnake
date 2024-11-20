@@ -13,13 +13,8 @@ public class BotSnakeController : ISnakeController
         _depth = depth;
     }
 
-    public SnakeAction MakeDecision()
+    public SnakeAction MakeDecision(Vector2Int headPosition, Vector2Int currentDirection)
     {
-        Vector2Int headPosition = _snake.Tiles[0].Position;
-        Vector2Int currentDirection = _snake.Tiles.Count > 1
-            ? _snake.Tiles[0].Position - _snake.Tiles[1].Position
-            : Vector2Int.up; // Default direction
-
         // Possible actions
         var actions = new[] { SnakeAction.MoveForward, SnakeAction.TurnLeft, SnakeAction.TurnRight };
 

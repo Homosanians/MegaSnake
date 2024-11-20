@@ -71,9 +71,12 @@ public class Snake : MonoBehaviour
     {
         if (_isDead) return;
 
-        var decision = _controller.MakeDecision();
+        var headPosition = CalculateHeadPosition();
+        var currentDirection = CalculateCurrentDirection();
 
-        Vector2Int nextPosition = CalculateNextPosition(decision);
+        var decision = _controller.MakeDecision(headPosition, currentDirection);
+
+        Vector2Int nextPosition = CalculateNextPosition(decision, headPosition, currentDirection);
 
         // Pass the next position to the board to attempt movement
         bool isSuccess = Board.TryMoveSnake(this, nextPosition);
@@ -82,14 +85,23 @@ public class Snake : MonoBehaviour
             Die();
     }
 
-    private Vector2Int CalculateNextPosition(SnakeAction decision)
+    private Vector2Int CalculateHeadPosition()
     {
-        // Get the head's position and the current direction
         Vector2Int headPosition = Tiles[0].Position;
+        return headPosition;
+    }
+
+    private Vector2Int CalculateCurrentDirection()
+    {
         Vector2Int currentDirection = Tiles.Count > 1
             ? Tiles[0].Position - Tiles[1].Position // Calculate direction from head to second tile
             : Vector2Int.up; // Default to upward movement for single-tile snakes
 
+        return currentDirection;
+    }
+
+    private Vector2Int CalculateNextPosition(SnakeAction decision, Vector2Int headPosition, Vector2Int currentDirection)
+    {
         Vector2Int nextDirection = decision switch
         {
             SnakeAction.MoveForward => currentDirection,
@@ -98,7 +110,7 @@ public class Snake : MonoBehaviour
             _ => throw new System.ArgumentException("Invalid SnakeAction provided.")
         };
 
-        Debug.Log($"current dir {currentDirection} - head {headPosition} - moving {decision} - next pos {headPosition + nextDirection}");
+        // Debug.Log($"current dir {currentDirection} - head {headPosition} - moving {decision} - next pos {headPosition + nextDirection}");
 
         // Calculate the next position
         return headPosition + nextDirection;

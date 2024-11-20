@@ -3,64 +3,104 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 
 [RequireComponent(typeof(Snake))]
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerSnakeController : MonoBehaviour, ISnakeController
 {
-    // private PlayerInput _input;
+    private Vector2 _inputDirection;
 
-    private SnakeAction _action = SnakeAction.MoveForward;
+    [SerializeField]
+    private bool _absoluteMovement = false;
 
-    public SnakeAction MakeDecision()
+    public SnakeAction MakeDecision(Vector2Int headPosition, Vector2Int currentDirection)
     {
-        var buffer = _action;
-        _action = SnakeAction.MoveForward;
-        return buffer;
+        // Gamepad, joystick require this
+        _inputDirection = _inputDirection.normalized;
+
+        if (_absoluteMovement)
+        {
+            Vector2Int inputDirectionInt = Vector2Int.zero;
+
+            if (_inputDirection == Vector2.up)
+                inputDirectionInt = Vector2Int.up;
+            else if (_inputDirection == Vector2.down)
+                inputDirectionInt = Vector2Int.down;
+            else if (_inputDirection == Vector2.left)
+                inputDirectionInt = Vector2Int.left;
+            else if (_inputDirection == Vector2.right)
+                inputDirectionInt = Vector2Int.right;
+
+            // Check if the input direction is valid and not opposite to the current direction
+            if (inputDirectionInt != Vector2Int.zero && inputDirectionInt != -currentDirection)
+            {
+                if (inputDirectionInt == currentDirection)
+                {
+                    return SnakeAction.MoveForward;
+                }
+                else if (IsTurnLeft(currentDirection, inputDirectionInt))
+                {
+                    return SnakeAction.TurnLeft;
+                }
+                else if (IsTurnRight(currentDirection, inputDirectionInt))
+                {
+                    return SnakeAction.TurnRight;
+                }
+            }
+
+            // Fallback to moving forward if no valid input or invalid turn
+            return SnakeAction.MoveForward;
+        }
+        else
+        {
+            if (_inputDirection == Vector2.up)
+            {
+                _inputDirection = Vector2.up;
+                return SnakeAction.MoveForward;
+            }
+            else if (_inputDirection == Vector2.left)
+            {
+                _inputDirection = Vector2.up;
+                return SnakeAction.TurnLeft;
+            }
+            else if (_inputDirection == Vector2.right)
+            {
+                _inputDirection = Vector2.up;
+                return SnakeAction.TurnRight;
+            }
+            else if (_inputDirection == Vector2.down)
+            {
+                _inputDirection = Vector2.up;
+                return SnakeAction.MoveForward;
+            }
+        }
+
+        Debug.LogError("Unexpected execution of player snake controller. Cant make relevant action decision. Moving forward.");
+        return SnakeAction.MoveForward;
     }
-
-    //private void Awake()
-    //{
-    //    _input = GetComponent<PlayerInput>();
-    //    _input.onActionTriggered += Action;
-    //}
-
-    //private void Action(InputAction.CallbackContext context)
-    //{
-    //    context.ReadValue<Vector2>();
-    //}
 
     public void InputMove(InputAction.CallbackContext context)
     {
         var input = context.ReadValue<Vector2>();
-
-        if (input == Vector2.up)
-        {
-            _action = SnakeAction.MoveForward;
-        }
-        else if (input == Vector2.left)
-        {
-            _action = SnakeAction.TurnLeft;
-        }
-        else if (input == Vector2.right)
-        {
-            _action = SnakeAction.TurnRight;
-        }
+        _inputDirection = input;
     }
 
-        //void Update()
-        //{
-        //    if (Input.GetKeyDown(KeyCode.W)) 
-        //    {
-        //        _action = SnakeAction.MoveForward;
-        //    }
-        //    else if (Input.GetKeyDown(KeyCode.A))
-        //    {
-        //        _action = SnakeAction.TurnLeft;
-        //    }
-        //    else if (Input.GetKeyDown(KeyCode.D))
-        //    {
-        //        _action = SnakeAction.TurnRight;
-        //    }
-        //}
+    // Helper method to determine if the input is a left turn relative to the current direction
+    private bool IsTurnLeft(Vector2Int currentDirection, Vector2Int inputDirection)
+    {
+        return (currentDirection == Vector2Int.up && inputDirection == Vector2Int.left) ||
+               (currentDirection == Vector2Int.left && inputDirection == Vector2Int.down) ||
+               (currentDirection == Vector2Int.down && inputDirection == Vector2Int.right) ||
+               (currentDirection == Vector2Int.right && inputDirection == Vector2Int.up);
+    }
+
+    // Helper method to determine if the input is a right turn relative to the current direction
+    private bool IsTurnRight(Vector2Int currentDirection, Vector2Int inputDirection)
+    {
+        return (currentDirection == Vector2Int.up && inputDirection == Vector2Int.right) ||
+               (currentDirection == Vector2Int.right && inputDirection == Vector2Int.down) ||
+               (currentDirection == Vector2Int.down && inputDirection == Vector2Int.left) ||
+               (currentDirection == Vector2Int.left && inputDirection == Vector2Int.up);
+    }
 }
