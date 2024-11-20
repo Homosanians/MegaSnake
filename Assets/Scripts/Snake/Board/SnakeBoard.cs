@@ -12,11 +12,10 @@ using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 public class SnakeBoard : MonoBehaviour
 {
+    public List<SnakeTile> OrphanedTiles { get; private set; } = new List<SnakeTile>();
+
     [field: SerializeField]
     public Tilemap Tilemap { get; private set; }
-    public List<Snake> Snakes { get; private set; } = new List<Snake>();
-    public List<SnakeTile> SnakeTiles { get; private set; } = new List<SnakeTile>();
-
     public List<string> WordList { get; private set; } = new List<string>()
     {
         "Слово",
@@ -76,8 +75,8 @@ public class SnakeBoard : MonoBehaviour
     {
         // InstantiateNewBotSnake(_playerSpawnPosition - new Vector2Int(2, 0), _playerSpawnSnakeLength);
         InstantiatePlayerSnake(_playerSnake, _playerSpawnPosition, _playerSpawnSnakeLength); // Dont call in awake
-                                                                                  //        InstantiateNewPlayerSnake(_playerSpawnPosition, _playerSpawnSnakeLength); // Dont call in awake
-        InstantiateNewBotSnake(_playerSpawnPosition + new Vector2Int(2,0), _playerSpawnSnakeLength, 1);
+                                                                                             //        InstantiateNewPlayerSnake(_playerSpawnPosition, _playerSpawnSnakeLength); // Dont call in awake
+        InstantiateNewBotSnake(_playerSpawnPosition + new Vector2Int(2, 0), _playerSpawnSnakeLength, 1);
     }
 
     public void InstantiatePlayerSnake(Snake snake, Vector2Int spawnPosition, int length)
@@ -105,23 +104,28 @@ public class SnakeBoard : MonoBehaviour
         snake.Initialize(CommonBotTile, this, controller, spawnPosition, length);
     }
 
-    private void MoveTile(Vector3Int position, Vector3Int newPosition)
-    {
-        var tile = Tilemap.GetTile(position);
-        Tilemap.SetTile(newPosition, tile);
-        Tilemap.SetTile(position, null);
-    }
-
     private void MoveTile(SnakeTile snakeTile, Vector2Int newPosition, string newLetter = null)
     {
-        if (IsPositionOccupied(newPosition))
-        {
-            throw new Exception("Cannot move tile to occupied position");
-        }
-
         if (!IsPositionWithinBounds(newPosition))
         {
             throw new Exception("Cannot move tile to position out of bounds");
+        }
+
+        var data = GetPositionData(newPosition);
+
+        if (data.IsFree == false)
+        {
+            data.SnakeTile.Hit(snakeTile);
+
+            if (data.SnakeTile != null && snakeTile.Parent != null)
+                snakeTile.Parent.AddSnakeTileToTail(data.SnakeTile.Letter);
+        }
+
+        var orphanedTile = OrphanedTiles.SingleOrDefault(x => x.Position == newPosition);
+        if (orphanedTile != null)
+        {
+            snakeTile.Parent.AddSnakeTileToTail(orphanedTile.Letter);
+            OrphanedTiles.Remove(orphanedTile);
         }
 
         // Optionally update the text
@@ -129,7 +133,7 @@ public class SnakeBoard : MonoBehaviour
         {
             snakeTile.UpdateText(newLetter);
         }
-        
+
         // Move the tile
         Tilemap.SetTile(newPosition.ToVector3Int(), snakeTile.CustomTile);
         Tilemap.SetTile(snakeTile.Position.ToVector3Int(), null);
@@ -198,10 +202,10 @@ public class SnakeBoard : MonoBehaviour
         return null; // Return null if no suitable position is found
     }
 
-    public void PurgeAll()
-    {
+    //public void PurgeAll()
+    //{
 
-    }
+    //}
 
     public bool IsPositionWithinBounds(Vector2Int position)
     {
@@ -209,23 +213,83 @@ public class SnakeBoard : MonoBehaviour
                position.y >= _calculatedMinBoundPoint.y && position.y <= _calculatedMaxBoundPoint.y;
     }
 
+    public TileDataResult GetPositionData(Vector2Int position)
+    {
+        var tile = Tilemap.GetTile(position.ToVector3Int());
+
+        if (tile != null)
+        {
+            SnakeTile tileData = null;
+            foreach (var snake in new List<Snake>(SnakeOrchestrator.Instance.Snakes)) // to avoid exception due to change of collection during enumeration
+            {
+                tileData = snake.Tiles.Find(x => x.Position == position);
+
+                if (tileData != null)
+                    break;
+            }
+
+            if (tileData != null)
+            {
+                if (tileData.SnakeTailState == SnakeTileState.Orphaned)
+                {
+                    return new TileDataResult()
+                    {
+                        IsFree = false,
+                        IsTileSnakeHead = tileData.Order == 0,
+                        SnakeTile = tileData
+                    };
+                }
+                else if (tileData.SnakeTailState == SnakeTileState.PartOfLivingSnake)
+                {
+                    return new TileDataResult()
+                    {
+                        IsFree = false,
+                        IsTileSnakeHead = tileData.Order == 0,
+                        SnakeTile = tileData
+                    };
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"Tile data is null");
+            }
+        }
+
+        return new TileDataResult()
+        {
+            IsFree = true,
+        };
+    }
+
+    public bool IsPositionLivingSnakeHead(Vector2Int position)
+    {
+        var positionData = GetPositionData(position);
+        return positionData.IsFree == false && positionData.SnakeTile.SnakeTailState == SnakeTileState.PartOfLivingSnake && positionData.IsTileSnakeHead.HasValue && positionData.IsTileSnakeHead.Value;
+    }
+
     public bool IsPositionOccupied(Vector2Int position)
     {
         return Tilemap.GetTile(position.ToVector3Int()) != null;
-        //return Tilemap.HasTile(position.ToVector3Int());
     }
 
     public bool TryMoveSnake(Snake snake, Vector2Int nextPosition)
     {
         if (!IsPositionWithinBounds(nextPosition))
         {
-            Debug.Log("Out of bounds");
+            Debug.Log("TryMoveSnake: nextPosition is Out of bounds");
             return false;
         }
 
-        if (IsPositionOccupied(nextPosition))
+        // Next position is not a part of caller snake
+        if (snake.Tiles.Any(x => x.Position == nextPosition))
         {
-            Debug.Log("Occupied");
+            Debug.Log("TryMoveSnake: nextPosition is the snake, cant eat itself");
+            return false;
+        }
+
+        if (IsPositionLivingSnakeHead(nextPosition))
+        {
+            Debug.Log("TryMoveSnake: nextPosition is Living snake head");
             return false;
         }
 
@@ -238,12 +302,11 @@ public class SnakeBoard : MonoBehaviour
     {
         Vector2Int previousPosition;
 
-        foreach (var tile in snake.Tiles)
+        foreach (var tile in new List<SnakeTile>(snake.Tiles)) // to avoid exception make a copy
         {
             previousPosition = tile.Position;
 
-            // Optionally update text (e.g., if text depends on position or order)
-            string newText = tile.Order.ToString(); // Example: update text to show the order
+            string newText = tile.Letter.ToString();
             MoveTile(tile, nextPosition, newText);
 
             nextPosition = previousPosition;

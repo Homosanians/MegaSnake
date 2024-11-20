@@ -17,9 +17,10 @@ public class SnakeTile
     public int Order { get; set; }
     public UnityEngine.Tilemaps.Tile CustomTile { get; private set; }
 
-    public SnakeTile(SnakeBoard snakeBoard, int order, Vector2Int position, string letter, UnityEngine.Tilemaps.Tile tile, SnakeTileState snakeTailState = SnakeTileState.PartOfLivingSnake)
+    public SnakeTile(SnakeBoard snakeBoard, Snake snake, int order, Vector2Int position, string letter, UnityEngine.Tilemaps.Tile tile, SnakeTileState snakeTailState = SnakeTileState.PartOfLivingSnake)
     {
         SnakeBoard = snakeBoard;
+        Parent = snake;
         Order = order;
         Position = position;
         Letter = letter;
@@ -58,5 +59,11 @@ public class SnakeTile
         {
             Debug.LogError("TMP_Text component not found on the tile.");
         }
+    }
+
+    internal void Hit(SnakeTile hitBySnakeTile)
+    {
+        if (Parent != null)
+            Parent.Die();
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem.XR;
 using UnityEngine.Tilemaps;
@@ -14,12 +15,52 @@ public class Snake : MonoBehaviour
     private bool _isDead = false;
     private Tile _commonTile;
 
+    readonly List<Vector2Int> directions = new List<Vector2Int>
+    {
+        Vector2Int.up,
+        Vector2Int.down,
+        Vector2Int.left,
+        Vector2Int.right
+    };
+
     public void AddSnakeTile(int order, Vector2Int position, string letter)
     {
-        var snakeTile = new SnakeTile(Board, order, position, letter, ScriptableObject.Instantiate(_commonTile));
+        var snakeTile = new SnakeTile(Board, this, order, position, letter, ScriptableObject.Instantiate(_commonTile));
 
         Tiles.Add(snakeTile);
         Board.Tilemap.SetTile(position.ToVector3Int(), snakeTile.CustomTile);
+    }
+
+    public void AddSnakeTileToTail(string letter)
+    {
+        Debug.LogWarning("New tile added to tail");
+
+        Vector2Int tailPosition = Tiles[^1].Position; // Get the position of the tail
+        Vector2Int? suitablePosition = null;
+
+        // calculate free position around tail
+        foreach (var direction in directions)
+        {
+            Vector2Int candidatePosition = tailPosition + direction;
+
+            // Check if the candidate position is not occupied and is within bounds
+            if (!Board.IsPositionOccupied(candidatePosition) && Board.IsPositionWithinBounds(candidatePosition))
+            {
+                suitablePosition = candidatePosition;
+                break; // Stop searching once a valid position is found
+            }
+        }
+
+        if (!suitablePosition.HasValue)
+        {
+            Die();
+            return;
+        }
+
+        var snakeTile = new SnakeTile(Board, this, Tiles.Count, suitablePosition.Value, letter, ScriptableObject.Instantiate(_commonTile));
+
+        Tiles.Add(snakeTile);
+        Board.Tilemap.SetTile(suitablePosition.Value.ToVector3Int(), snakeTile.CustomTile);
     }
 
     public void Initialize(Tile commonTile, SnakeBoard snakeBoard, ISnakeController controller, Vector2Int position, int length)
@@ -55,6 +96,8 @@ public class Snake : MonoBehaviour
     {
         Debug.LogWarning("Snake died");
 
+        SnakeOrchestrator.Instance.Deregister(this);
+
         _isDead = true;
 
         foreach (var item in Tiles)
@@ -62,14 +105,18 @@ public class Snake : MonoBehaviour
             item.ChangeState(SnakeTileState.Orphaned);
         }
 
-        SnakeOrchestrator.Instance.Deregister(this);
+        Board.OrphanedTiles.AddRange(Tiles);
+        Tiles.Clear();
 
         Destroy(this);
     }
 
     public void Move()
     {
-        if (_isDead) return;
+        if (_isDead)
+        {
+            return;
+        }
 
         var headPosition = CalculateHeadPosition();
         var currentDirection = CalculateCurrentDirection();

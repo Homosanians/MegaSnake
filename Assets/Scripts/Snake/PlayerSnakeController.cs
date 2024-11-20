@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Windows;
 
-[RequireComponent(typeof(Snake))]
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerSnakeController : MonoBehaviour, ISnakeController
 {

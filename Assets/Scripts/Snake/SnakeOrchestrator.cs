@@ -8,8 +8,8 @@ public class SnakeOrchestrator : MonoBehaviourSingleton<SnakeOrchestrator>
 {
     public List<Snake> Snakes { get; private set; } = new List<Snake>();
 
-    private int _tickIntervalMilliseconds = 100;
-    private int _startupHoldMilliseconds = 0;
+    private int _tickIntervalMilliseconds = 150;
+    private int _startupHoldMilliseconds = 100;
     private bool _isRunning = true;
 
     private Queue<Snake> _enlistSnake = new Queue<Snake>();
@@ -22,7 +22,7 @@ public class SnakeOrchestrator : MonoBehaviourSingleton<SnakeOrchestrator>
 
     private IEnumerator TickLoop()
     {
-        yield return new WaitForSeconds(_tickIntervalMilliseconds / 1000f);
+        yield return new WaitForSeconds(_startupHoldMilliseconds / 1000f);
 
         while (_isRunning)
         {

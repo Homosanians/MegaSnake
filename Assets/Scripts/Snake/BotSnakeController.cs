@@ -30,8 +30,12 @@ public class BotSnakeController : ISnakeController
             // Calculate the next position based on the next direction
             Vector2Int nextPosition = headPosition + nextDirection;
 
-            // Skip invalid moves (out of bounds or occupied)
-            if (!_board.IsPositionWithinBounds(nextPosition) || _board.IsPositionOccupied(nextPosition))
+            var nextPositionData = _board.GetPositionData(nextPosition);
+
+            bool isNextPositionLivingSnakeHead = nextPositionData.IsTileSnakeHead.HasValue && nextPositionData.SnakeTile.SnakeTailState == SnakeTileState.PartOfLivingSnake && nextPositionData.IsTileSnakeHead.Value;
+
+            // Skip invalid moves (out of bounds or living snake head)
+            if (!_board.IsPositionWithinBounds(nextPosition) || isNextPositionLivingSnakeHead)
                 continue;
 
             // Simulate the move and evaluate the score
@@ -60,7 +64,14 @@ public class BotSnakeController : ISnakeController
 
     private int SimulatePath(Vector2Int position, Vector2Int direction, int depth)
     {
-        if (depth == 0 || !_board.IsPositionWithinBounds(position) || _board.IsPositionOccupied(position))
+        var positionData = _board.GetPositionData(position); // todo: optimize Second call in 1 tick - possible solution: LRU with force reset on tick end
+        bool isPositionLivingSnakeHead = positionData.IsTileSnakeHead.HasValue && positionData.SnakeTile.SnakeTailState == SnakeTileState.PartOfLivingSnake && positionData.IsTileSnakeHead.Value;
+
+        //
+        // TODO make bot to head into SNAKE body part.
+        //
+
+        if (depth == 0 || !_board.IsPositionWithinBounds(position) || isPositionLivingSnakeHead)
             return 0; // End simulation if out of depth, bounds, or position is occupied
 
         int score = 1; // Base score for a valid move

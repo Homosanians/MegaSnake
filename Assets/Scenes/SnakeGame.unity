@@ -1412,7 +1412,7 @@ MonoBehaviour:
   <Tilemap>k__BackingField: {fileID: 1240372693}
   _boardSize: {x: 10, y: 20}
   _playerSpawnPosition: {x: 0, y: 0}
-  _playerSpawnSnakeLength: 5
+  _playerSpawnSnakeLength: 8
   _playerSnake: {fileID: 1755460648}
   _snakePrefab: {fileID: 7912054452659155755, guid: 5e9cfc798033f4ec889189d9c480271d, type: 3}
   _commonBotTile: {fileID: 11400000, guid: 49d35fd8273140b4084be7ec63028b82, type: 2}
