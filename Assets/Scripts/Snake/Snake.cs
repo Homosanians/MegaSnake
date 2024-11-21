@@ -38,7 +38,7 @@ public class Snake : MonoBehaviour
         AddSnakeTile(Tiles.Count, tailPosition, letter);
     }
 
-    public void Initialize(Tile commonTile, SnakeBoard snakeBoard, ISnakeController controller, Vector2Int position, int length)
+    public void Initialize(Tile commonTile, SnakeBoard snakeBoard, ISnakeController controller, Vector2Int position, char[] letters)
     {
         _commonTile = commonTile;
         Board = snakeBoard;
@@ -46,18 +46,15 @@ public class Snake : MonoBehaviour
 
         SnakeOrchestrator.Instance.Register(this);
 
-        // Create and set the head tile
-        AddSnakeTile(0, position, "0");
-
         Vector2Int currentPosition = position;
 
         // Create and set the body tiles
-        for (int i = 1; i < length; i++)
+        for (int i = 0; i < letters.Length; i++)
         {
             Vector3Int? nextPosition = Board.FindFreeAdjacentPosition(currentPosition.ToVector3Int(), prefferedDirection: new Vector3Int(0, -1, 0));
             if (nextPosition.HasValue)
             {
-                AddSnakeTile(i, nextPosition.Value.ToVector2Int(), i.ToString());
+                AddSnakeTile(i, nextPosition.Value.ToVector2Int(), letters[i].ToString());
                 currentPosition = nextPosition.Value.ToVector2Int();
             }
             else

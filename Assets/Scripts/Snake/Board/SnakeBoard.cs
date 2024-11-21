@@ -18,9 +18,8 @@ public class SnakeBoard : MonoBehaviour
     public Tilemap Tilemap { get; private set; }
     public List<string> WordList { get; private set; } = new List<string>()
     {
-        "Слово",
-        "Не",
-        "Воробей"
+        "Пизда",
+        "Хуеплетка"
     };
 
     public int Width => _boardSize.x;
@@ -74,15 +73,15 @@ public class SnakeBoard : MonoBehaviour
     private void OnEnable()
     {
         // InstantiateNewBotSnake(_playerSpawnPosition - new Vector2Int(2, 0), _playerSpawnSnakeLength);
-        InstantiatePlayerSnake(_playerSnake, _playerSpawnPosition, _playerSpawnSnakeLength); // Dont call in awake
+        InstantiatePlayerSnake(_playerSnake, _playerSpawnPosition, WordList[0].ToArray()); // Dont call in awake
                                                                                              //        InstantiateNewPlayerSnake(_playerSpawnPosition, _playerSpawnSnakeLength); // Dont call in awake
-        InstantiateNewBotSnake(_playerSpawnPosition + new Vector2Int(2, 0), _playerSpawnSnakeLength, 1);
+        InstantiateNewBotSnake(_playerSpawnPosition + new Vector2Int(2, 0), WordList[1].ToArray(), 1);
     }
 
-    public void InstantiatePlayerSnake(Snake snake, Vector2Int spawnPosition, int length)
+    public void InstantiatePlayerSnake(Snake snake, Vector2Int spawnPosition, char[] lettersArray)
     {
         var controller = snake.gameObject.GetComponent<PlayerSnakeController>();
-        snake.Initialize(CommonPlayerTile, this, controller, spawnPosition, length);
+        snake.Initialize(CommonPlayerTile, this, controller, spawnPosition, lettersArray);
     }
 
     //public void InstantiateNewPlayerSnake(Vector2Int spawnPosition, int length)
@@ -96,12 +95,12 @@ public class SnakeBoard : MonoBehaviour
     //    snake.Initialize(CommonPlayerTile, this, controller, spawnPosition, length);
     //}
 
-    public void InstantiateNewBotSnake(Vector2Int spawnPosition, int length, int thinkAheadDepth = 10)
+    public void InstantiateNewBotSnake(Vector2Int spawnPosition, char[] lettersArray, int thinkAheadDepth = 10)
     {
         var instance = GameObject.Instantiate(_snakePrefab, transform);
         var snake = instance.GetComponent<Snake>();
         var controller = new BotSnakeController(snake, this, thinkAheadDepth);
-        snake.Initialize(CommonBotTile, this, controller, spawnPosition, length);
+        snake.Initialize(CommonBotTile, this, controller, spawnPosition, lettersArray);
     }
 
     private void MoveTile(SnakeTile snakeTile, Vector2Int newPosition, string newLetter = null)
