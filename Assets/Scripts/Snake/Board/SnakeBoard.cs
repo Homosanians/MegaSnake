@@ -247,10 +247,6 @@ public class SnakeBoard : MonoBehaviour
                     };
                 }
             }
-            else
-            {
-                Debug.LogWarning($"Tile data is null");
-            }
         }
 
         return new TileDataResult()
