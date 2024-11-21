@@ -106,6 +106,8 @@ public class SnakeBoard : MonoBehaviour
 
     private void MoveTile(SnakeTile snakeTile, Vector2Int newPosition, string newLetter = null)
     {
+        // Order here matters for the whole application, don't move around if you don't know what you do.
+
         if (!IsPositionWithinBounds(newPosition))
         {
             throw new Exception("Cannot move tile to position out of bounds");
@@ -116,14 +118,11 @@ public class SnakeBoard : MonoBehaviour
         if (data.IsFree == false)
         {
             data.SnakeTile.Hit(snakeTile);
-
-            if (data.SnakeTile != null && snakeTile.Parent != null)
-                snakeTile.Parent.AddSnakeTileToTail(data.SnakeTile.Letter);
         }
 
         var orphanedTile = OrphanedTiles.SingleOrDefault(x => x.Position == newPosition);
         if (orphanedTile != null)
-        {
+        {;
             snakeTile.Parent.AddSnakeTileToTail(orphanedTile.Letter);
             OrphanedTiles.Remove(orphanedTile);
         }

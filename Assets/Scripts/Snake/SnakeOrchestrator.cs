@@ -8,7 +8,7 @@ public class SnakeOrchestrator : MonoBehaviourSingleton<SnakeOrchestrator>
 {
     public List<Snake> Snakes { get; private set; } = new List<Snake>();
 
-    private int _tickIntervalMilliseconds = 150;
+    private int _tickIntervalMilliseconds = 250;
     private int _startupHoldMilliseconds = 100;
     private bool _isRunning = true;
 

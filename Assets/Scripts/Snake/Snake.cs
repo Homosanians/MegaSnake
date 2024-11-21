@@ -33,34 +33,9 @@ public class Snake : MonoBehaviour
 
     public void AddSnakeTileToTail(string letter)
     {
-        Debug.LogWarning("New tile added to tail");
-
         Vector2Int tailPosition = Tiles[^1].Position; // Get the position of the tail
-        Vector2Int? suitablePosition = null;
 
-        // calculate free position around tail
-        foreach (var direction in directions)
-        {
-            Vector2Int candidatePosition = tailPosition + direction;
-
-            // Check if the candidate position is not occupied and is within bounds
-            if (!Board.IsPositionOccupied(candidatePosition) && Board.IsPositionWithinBounds(candidatePosition))
-            {
-                suitablePosition = candidatePosition;
-                break; // Stop searching once a valid position is found
-            }
-        }
-
-        if (!suitablePosition.HasValue)
-        {
-            Die();
-            return;
-        }
-
-        var snakeTile = new SnakeTile(Board, this, Tiles.Count, suitablePosition.Value, letter, ScriptableObject.Instantiate(_commonTile));
-
-        Tiles.Add(snakeTile);
-        Board.Tilemap.SetTile(suitablePosition.Value.ToVector3Int(), snakeTile.CustomTile);
+        AddSnakeTile(Tiles.Count, tailPosition, letter);
     }
 
     public void Initialize(Tile commonTile, SnakeBoard snakeBoard, ISnakeController controller, Vector2Int position, int length)

@@ -13,7 +13,7 @@ public class SnakeTile
     public Snake? Parent { get; private set; }
     public string Letter { get; private set; }
     public SnakeTileState SnakeTailState { get; private set; }
-    public Vector2Int Position {get;set;}
+    public Vector2Int Position { get; set; }
     public int Order { get; set; }
     public UnityEngine.Tilemaps.Tile CustomTile { get; private set; }
 
