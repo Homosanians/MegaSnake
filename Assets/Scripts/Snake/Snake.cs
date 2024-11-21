@@ -87,6 +87,7 @@ public class Snake : MonoBehaviour
     {
         if (_isDead)
         {
+            // Next tick handling - better safe than sorry
             return;
         }
 

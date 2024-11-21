@@ -313,9 +313,8 @@ public class SnakeBoard : MonoBehaviour
 
     internal void SetColor(Tile customTile, Vector2Int position, Color color)
     {
-        Tilemap.SetTile(position.ToVector3Int(), null);
         customTile.color = color;
-        Tilemap.SetTile(position.ToVector3Int(), customTile);
+        Tilemap.RefreshTile(position.ToVector3Int());
     }
 
     //private void MoveSnake(Snake snake, Vector2Int nextPosition)
