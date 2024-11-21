@@ -1410,7 +1410,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   <Tilemap>k__BackingField: {fileID: 1240372693}
-  _boardSize: {x: 10, y: 20}
+  _boardSize: {x: 40, y: 30}
   _playerSpawnPosition: {x: 0, y: 0}
   _playerSpawnSnakeLength: 3
   _playerSnake: {fileID: 1755460648}

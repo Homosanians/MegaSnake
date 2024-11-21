@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ public class SnakeOrchestrator : MonoBehaviourSingleton<SnakeOrchestrator>
 {
     public List<Snake> Snakes { get; private set; } = new List<Snake>();
 
-    private int _tickIntervalMilliseconds = 250;
+    private int _tickIntervalMilliseconds = 450;
     private int _startupHoldMilliseconds = 100;
     private bool _isRunning = true;
 

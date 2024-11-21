@@ -18,8 +18,8 @@ public class SnakeBoard : MonoBehaviour
     public Tilemap Tilemap { get; private set; }
     public List<string> WordList { get; private set; } = new List<string>()
     {
-        "Пизда",
-        "Хуеплетка"
+        "CUDA",
+        "MEMORYOUTOF"
     };
 
     public int Width => _boardSize.x;
