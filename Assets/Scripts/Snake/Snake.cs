@@ -14,6 +14,9 @@ public class Snake : MonoBehaviour
     private ISnakeController _controller;
     private bool _isDead = false;
     private Tile _commonTile;
+    
+    // Track if this is a player or bot snake
+    public bool IsPlayerSnake { get; private set; }
 
     readonly List<Vector2Int> directions = new List<Vector2Int>
     {
@@ -43,6 +46,9 @@ public class Snake : MonoBehaviour
         _commonTile = commonTile;
         Board = snakeBoard;
         _controller = controller;
+        
+        // Determine if this is a player snake based on the controller type
+        IsPlayerSnake = controller is PlayerSnakeController;
 
         SnakeOrchestrator.Instance.Register(this);
 
@@ -68,9 +74,11 @@ public class Snake : MonoBehaviour
     {
         Debug.LogWarning("Snake died");
 
-        SnakeOrchestrator.Instance.Deregister(this);
-
+        if (_isDead) return; // Prevent multiple deaths
+        
         _isDead = true;
+        
+        SnakeOrchestrator.Instance.Deregister(this);
 
         foreach (var item in Tiles)
         {
@@ -87,7 +95,6 @@ public class Snake : MonoBehaviour
     {
         if (_isDead)
         {
-            // Next tick handling - better safe than sorry
             return;
         }
 
@@ -129,8 +136,6 @@ public class Snake : MonoBehaviour
             SnakeAction.TurnRight => new Vector2Int(currentDirection.y, -currentDirection.x),
             _ => throw new System.ArgumentException("Invalid SnakeAction provided.")
         };
-
-        // Debug.Log($"current dir {currentDirection} - head {headPosition} - moving {decision} - next pos {headPosition + nextDirection}");
 
         // Calculate the next position
         return headPosition + nextDirection;

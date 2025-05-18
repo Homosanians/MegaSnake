@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 // https://gist.github.com/mstevenson/4325117
 
@@ -29,6 +30,28 @@ public class MonoBehaviourSingleton<T> : MonoBehaviour
             }
             return _instance;
         }
+    }
+    
+    // Add a static Reset method to clear the instance
+    public static void Reset()
+    {
+        _instance = null;
+    }
+    
+    protected virtual void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+    
+    protected virtual void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+    
+    protected virtual void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Reset the singleton instance when a new scene is loaded
+        Reset();
     }
 }
 

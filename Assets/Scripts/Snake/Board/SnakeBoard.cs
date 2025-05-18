@@ -8,7 +8,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
-using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 public class SnakeBoard : MonoBehaviour
 {
@@ -16,11 +15,13 @@ public class SnakeBoard : MonoBehaviour
 
     [field: SerializeField]
     public Tilemap Tilemap { get; private set; }
-    public List<string> WordList { get; private set; } = new List<string>()
-    {
-        "CUDA",
-        "MEMORYOUTOF"
-    };
+    
+    // This property is now removed as we'll use WordManager instead
+    // public List<string> WordList { get; private set; } = new List<string>()
+    // {
+    //     "CUDA",
+    //     "MEMORYOUTOF"
+    // };
 
     public int Width => _boardSize.x;
     public int Height => _boardSize.y;
@@ -35,11 +36,14 @@ public class SnakeBoard : MonoBehaviour
     private int _playerSpawnSnakeLength = 3;
 
     [SerializeField] private Snake _playerSnake;
+    [SerializeField] private Snake _botSnake;
 
     [SerializeField] private GameObject _snakePrefab;
 
     [SerializeField] private Tile _commonBotTile;
     [SerializeField] private Tile _commonPlayerTile;
+
+    [SerializeField] private WordManager _wordManager;
 
     public Tile CommonBotTile => _commonBotTile;
     public Tile CommonPlayerTile => _commonPlayerTile;
@@ -47,12 +51,15 @@ public class SnakeBoard : MonoBehaviour
     private Vector2Int _calculatedMinBoundPoint;
     private Vector2Int _calculatedMaxBoundPoint;
 
+    // Track the current bot snake for respawning
+    private Snake _currentBotSnake;
+
     readonly Vector3Int[] directions = new Vector3Int[]
-{
-            new Vector3Int(0, 1, 0),   // Up
-            new Vector3Int(1, 0, 0),   // Right
-            new Vector3Int(0, -1, 0),  // Down
-            new Vector3Int(-1, 0, 0)   // Left
+    {
+        new Vector3Int(0, 1, 0),   // Up
+        new Vector3Int(1, 0, 0),   // Right
+        new Vector3Int(0, -1, 0),  // Down
+        new Vector3Int(-1, 0, 0)   // Left
     };
 
     private void Awake()
@@ -68,14 +75,117 @@ public class SnakeBoard : MonoBehaviour
             boardWidthOdd ? 0.5f : 0,
             boardHeightOdd ? 0.5f : 0,
             0);
+            
+        if (_wordManager == null)
+        {
+            _wordManager = FindObjectOfType<WordManager>();
+            if (_wordManager == null)
+            {
+                Debug.LogError("WordManager not found in scene. Make sure to add WordManager to the scene.");
+            }
+        }
     }
 
     private void OnEnable()
     {
-        // InstantiateNewBotSnake(_playerSpawnPosition - new Vector2Int(2, 0), _playerSpawnSnakeLength);
-        InstantiatePlayerSnake(_playerSnake, _playerSpawnPosition, WordList[0].ToArray()); // Dont call in awake
-                                                                                             //        InstantiateNewPlayerSnake(_playerSpawnPosition, _playerSpawnSnakeLength); // Dont call in awake
-        InstantiateNewBotSnake(_playerSpawnPosition + new Vector2Int(2, 0), WordList[1].ToArray(), 1);
+        // Initialize word manager
+        _wordManager.Initialize();
+        
+        // Spawn player snake at random position with 4 tiles
+        Vector2Int randomPlayerPos = GetRandomFreePosition();
+        InstantiatePlayerSnake(_playerSnake, randomPlayerPos, new char[] {'П', 'Л', 'А', 'Й', 'Е', 'Р'});
+        
+        // Spawn the first bot snake with the first word
+        SpawnNewBotSnake();
+    }
+    
+    public void SpawnNewBotSnake()
+    {
+        // Get the current word from word manager
+        string currentWord = _wordManager.GetCurrentWord();
+        
+        if (string.IsNullOrEmpty(currentWord))
+        {
+            Debug.LogWarning("No more words to spawn snakes for.");
+            return;
+        }
+        
+        // Find a random position away from the player
+        Vector2Int randomBotPos = GetRandomPositionAwayFromPlayer();
+        
+        // Instantiate new bot snake with the current word
+        InstantiateNewBotSnake(randomBotPos, currentWord.ToCharArray(), 5);
+    }
+    
+    private Vector2Int GetRandomFreePosition()
+    {
+        // Try to find a position with at least 3 free adjacent tiles for the snake to grow
+        for (int attempts = 0; attempts < 100; attempts++)
+        {
+            int x = UnityEngine.Random.Range(_calculatedMinBoundPoint.x, _calculatedMaxBoundPoint.x + 1);
+            int y = UnityEngine.Random.Range(_calculatedMinBoundPoint.y, _calculatedMaxBoundPoint.y + 1);
+            
+            Vector2Int pos = new Vector2Int(x, y);
+            
+            if (!IsPositionOccupied(pos) && CountFreeAdjacentPositions(pos) >= 3)
+            {
+                return pos;
+            }
+        }
+        
+        // Fallback to the pre-defined spawn position
+        return _playerSpawnPosition;
+    }
+    
+    private Vector2Int GetRandomPositionAwayFromPlayer()
+    {
+        Snake playerSnake = null;
+        foreach (var snake in SnakeOrchestrator.Instance.Snakes)
+        {
+            // Assuming player snake is the first one in the list
+            playerSnake = snake;
+            break;
+        }
+        
+        if (playerSnake == null || playerSnake.Tiles.Count == 0)
+        {
+            return GetRandomFreePosition();
+        }
+        
+        Vector2Int playerHeadPos = playerSnake.Tiles[0].Position;
+        Vector2Int bestPosition = Vector2Int.zero;
+        float maxDistance = 0f;
+        
+        // Try several random positions and pick the one furthest from player
+        for (int i = 0; i < 20; i++)
+        {
+            Vector2Int candidate = GetRandomFreePosition();
+            float distance = Vector2.Distance(candidate, playerHeadPos);
+            
+            if (distance > maxDistance)
+            {
+                maxDistance = distance;
+                bestPosition = candidate;
+            }
+        }
+        
+        return bestPosition;
+    }
+    
+    private int CountFreeAdjacentPositions(Vector2Int position)
+    {
+        int count = 0;
+        
+        foreach (var dir in directions)
+        {
+            Vector2Int neighbor = position + new Vector2Int(dir.x, dir.y);
+            if (IsPositionWithinBounds(neighbor) && !IsPositionOccupied(neighbor))
+            {
+                count++;
+            }
+        }
+        
+        return count;
     }
 
     public void InstantiatePlayerSnake(Snake snake, Vector2Int spawnPosition, char[] lettersArray)
@@ -84,23 +194,21 @@ public class SnakeBoard : MonoBehaviour
         snake.Initialize(CommonPlayerTile, this, controller, spawnPosition, lettersArray);
     }
 
-    //public void InstantiateNewPlayerSnake(Vector2Int spawnPosition, int length)
-    //{
-    //    var instance = GameObject.Instantiate(_snakePrefab, transform);
-    //    var snake = instance.GetComponent<Snake>();
-
-    //    GameObject obj = new GameObject();
-    //    var controller = obj.AddComponent<PlayerSnakeController>();
-
-    //    snake.Initialize(CommonPlayerTile, this, controller, spawnPosition, length);
-    //}
-
     public void InstantiateNewBotSnake(Vector2Int spawnPosition, char[] lettersArray, int thinkAheadDepth = 10)
     {
+        // Destroy previous bot snake if it exists
+        if (_currentBotSnake != null)
+        {
+            _currentBotSnake.Die();
+        }
+        
         var instance = GameObject.Instantiate(_snakePrefab, transform);
         var snake = instance.GetComponent<Snake>();
         var controller = new BotSnakeController(snake, this, thinkAheadDepth);
         snake.Initialize(CommonBotTile, this, controller, spawnPosition, lettersArray);
+        
+        // Store reference to current bot snake
+        _currentBotSnake = snake;
     }
 
     private void MoveTile(SnakeTile snakeTile, Vector2Int newPosition, string newLetter = null)
@@ -263,33 +371,83 @@ public class SnakeBoard : MonoBehaviour
 
     public bool IsPositionOccupied(Vector2Int position)
     {
-        return Tilemap.GetTile(position.ToVector3Int()) != null;
+        if (Tilemap != null)
+        {
+            return Tilemap.GetTile(position.ToVector3Int()) != null;
+        }
+        else 
+        {
+            return true;
+        }
     }
 
     public bool TryMoveSnake(Snake snake, Vector2Int nextPosition)
     {
         if (!IsPositionWithinBounds(nextPosition))
         {
-            Debug.Log("TryMoveSnake: nextPosition is Out of bounds");
             return false;
         }
 
-        // Next position is not a part of caller snake
-        if (snake.Tiles.Any(x => x.Position == nextPosition))
+        var data = GetPositionData(nextPosition);
+
+        if (data.IsFree)
         {
-            Debug.Log("TryMoveSnake: nextPosition is the snake, cant eat itself");
-            return false;
+            MoveSnake(snake, nextPosition);
+            return true;
         }
-
-        if (IsPositionLivingSnakeHead(nextPosition))
+        else
         {
-            Debug.Log("TryMoveSnake: nextPosition is Living snake head");
+            // Check if this is a player snake hitting a bot snake's body or vice versa
+            bool isPlayerSnake = snake.IsPlayerSnake;
+            bool isBotSnake = !isPlayerSnake;
+            bool isCollidingWithBotSnake = data.SnakeTile != null && data.SnakeTile.CustomTile == CommonBotTile;
+            bool isCollidingWithPlayerSnake = data.SnakeTile != null && data.SnakeTile.CustomTile == CommonPlayerTile;
+            
+            if (isPlayerSnake && isCollidingWithBotSnake)
+            {
+                // Player's head hit a bot snake, kill the bot snake
+                // Find the bot snake and kill it
+                foreach (var botSnake in new List<Snake>(SnakeOrchestrator.Instance.Snakes))
+                {
+                    if (!botSnake.IsPlayerSnake)
+                    {
+                        botSnake.Die();
+                        break;
+                    }
+                }
+                
+                // Move to next word
+                _wordManager.MoveToNextWord();
+                
+                // Spawn a new bot snake with the next word after a delay
+                StartCoroutine(SpawnNewBotSnakeAfterDelay(0.5f));
+                
+                // Allow player to move normally
+                MoveSnake(snake, nextPosition);
+                return true;
+            }
+            else if (isBotSnake && isCollidingWithPlayerSnake)
+            {
+                // Bot's head hit a player snake, move to next word
+                _wordManager.MoveToNextWord();
+                
+                // Snake will be destroyed by the SnakeTile.Hit method
+                MoveSnake(snake, nextPosition);
+                
+                // Spawn a new bot snake with the next word after a delay
+                StartCoroutine(SpawnNewBotSnakeAfterDelay(0.5f));
+                
+                return true;
+            }
+            
             return false;
         }
-
-        MoveSnake(snake, nextPosition);
-
-        return true;
+    }
+    
+    private System.Collections.IEnumerator SpawnNewBotSnakeAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SpawnNewBotSnake();
     }
 
     private void MoveSnake(Snake snake, Vector2Int nextPosition)

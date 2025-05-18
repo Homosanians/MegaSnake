@@ -2,43 +2,92 @@ using UnityEngine;
 
 public class BotSnakeController : ISnakeController
 {
-    readonly Snake _snake;
-    readonly SnakeBoard _board;
-    readonly int _depth;
+    private readonly Snake _snake;
+    private readonly SnakeBoard _board;
+    private readonly int _depth;
+    private readonly AStar _pathfinder;
 
     public BotSnakeController(Snake snake, SnakeBoard board, int depth)
     {
         _snake = snake;
         _board = board;
         _depth = depth;
+        _pathfinder = new AStar(board);
     }
 
     public SnakeAction MakeDecision(Vector2Int headPosition, Vector2Int currentDirection)
     {
-        // Possible actions
+        // Find the player snake
+        Snake playerSnake = null;
+        foreach (var snake in SnakeOrchestrator.Instance.Snakes)
+        {
+            if (snake != _snake)
+            {
+                playerSnake = snake;
+                break;
+            }
+        }
+
+        if (playerSnake == null || playerSnake.Tiles.Count == 0)
+        {
+            // No player snake found or the player has no tiles, just use the old behavior
+            return FallbackDecision(headPosition, currentDirection);
+        }
+
+        // Get player snake head position
+        Vector2Int playerHeadPosition = playerSnake.Tiles[0].Position;
+
+        // Use A* to find the best position to move to (furthest from player)
+        Vector2Int bestNextPosition = _pathfinder.FindFurthestPoint(headPosition, playerHeadPosition, _depth);
+
+        // Convert the position to an action
+        Vector2Int moveVector = bestNextPosition - headPosition;
+        
+        // If the best next position is the current position or invalid, use fallback
+        if (moveVector == Vector2Int.zero || !_board.IsPositionWithinBounds(bestNextPosition) || _board.IsPositionOccupied(bestNextPosition))
+        {
+            return FallbackDecision(headPosition, currentDirection);
+        }
+
+        // Convert the move vector to an action
+        if (moveVector == currentDirection)
+        {
+            return SnakeAction.MoveForward;
+        }
+        else if (moveVector == new Vector2Int(-currentDirection.y, currentDirection.x)) // Left turn
+        {
+            return SnakeAction.TurnLeft;
+        }
+        else if (moveVector == new Vector2Int(currentDirection.y, -currentDirection.x)) // Right turn
+        {
+            return SnakeAction.TurnRight;
+        }
+        
+        // If we can't determine a valid action, use fallback
+        return FallbackDecision(headPosition, currentDirection);
+    }
+
+    private SnakeAction FallbackDecision(Vector2Int headPosition, Vector2Int currentDirection)
+    {
+        // Original logic as fallback
         var actions = new[] { SnakeAction.MoveForward, SnakeAction.TurnLeft, SnakeAction.TurnRight };
 
-        // Evaluate each action
         SnakeAction bestAction = SnakeAction.MoveForward;
         int bestScore = int.MinValue;
 
         foreach (var action in actions)
         {
-            // Calculate the next direction based on the action
             Vector2Int nextDirection = GetNextDirection(currentDirection, action);
-
-            // Calculate the next position based on the next direction
             Vector2Int nextPosition = headPosition + nextDirection;
 
             var nextPositionData = _board.GetPositionData(nextPosition);
+            bool isNextPositionLivingSnakeHead = nextPositionData.IsTileSnakeHead.HasValue && 
+                                                 nextPositionData.SnakeTile.SnakeTailState == SnakeTileState.PartOfLivingSnake && 
+                                                 nextPositionData.IsTileSnakeHead.Value;
 
-            bool isNextPositionLivingSnakeHead = nextPositionData.IsTileSnakeHead.HasValue && nextPositionData.SnakeTile.SnakeTailState == SnakeTileState.PartOfLivingSnake && nextPositionData.IsTileSnakeHead.Value;
-
-            // Skip invalid moves (out of bounds or living snake head)
             if (!_board.IsPositionWithinBounds(nextPosition) || isNextPositionLivingSnakeHead)
                 continue;
 
-            // Simulate the move and evaluate the score
             int score = SimulatePath(nextPosition, nextDirection, depth: _depth);
 
             if (score > bestScore)
@@ -64,15 +113,13 @@ public class BotSnakeController : ISnakeController
 
     private int SimulatePath(Vector2Int position, Vector2Int direction, int depth)
     {
-        var positionData = _board.GetPositionData(position); // todo: optimize Second call in 1 tick - possible solution: LRU with force reset on tick end
-        bool isPositionLivingSnakeHead = positionData.IsTileSnakeHead.HasValue && positionData.SnakeTile.SnakeTailState == SnakeTileState.PartOfLivingSnake && positionData.IsTileSnakeHead.Value;
-
-        //
-        // TODO make bot to head into SNAKE body part.
-        //
+        var positionData = _board.GetPositionData(position);
+        bool isPositionLivingSnakeHead = positionData.IsTileSnakeHead.HasValue && 
+                                         positionData.SnakeTile.SnakeTailState == SnakeTileState.PartOfLivingSnake && 
+                                         positionData.IsTileSnakeHead.Value;
 
         if (depth == 0 || !_board.IsPositionWithinBounds(position) || isPositionLivingSnakeHead)
-            return 0; // End simulation if out of depth, bounds, or position is occupied
+            return 0;
 
         int score = 1; // Base score for a valid move
 

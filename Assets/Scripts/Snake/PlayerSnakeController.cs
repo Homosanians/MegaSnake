@@ -12,9 +12,21 @@ public class PlayerSnakeController : MonoBehaviour, ISnakeController
 
     [SerializeField]
     private bool _absoluteMovement = false;
+    
+    // Button input state
+    private SnakeAction _pendingAction = SnakeAction.MoveForward;
 
     public SnakeAction MakeDecision(Vector2Int headPosition, Vector2Int currentDirection)
     {
+        // If using button input, use the pending action
+        if (_pendingAction != SnakeAction.MoveForward)
+        {
+            SnakeAction action = _pendingAction;
+            _pendingAction = SnakeAction.MoveForward; // Reset after using
+            return action;
+        }
+    
+        // Input system input handling
         // Gamepad, joystick require this
         _inputDirection = _inputDirection.normalized;
 
@@ -83,6 +95,17 @@ public class PlayerSnakeController : MonoBehaviour, ISnakeController
     {
         var input = context.ReadValue<Vector2>();
         _inputDirection = input;
+    }
+    
+    // Button input methods for UI buttons
+    public void InputButtonLeft()
+    {
+        _pendingAction = SnakeAction.TurnLeft;
+    }
+    
+    public void InputButtonRight()
+    {
+        _pendingAction = SnakeAction.TurnRight;
     }
 
     // Helper method to determine if the input is a left turn relative to the current direction
